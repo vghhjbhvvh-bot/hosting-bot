@@ -37,6 +37,33 @@ HOSTED_DIR = "hosted_bots"
 if not os.path.exists(HOSTED_DIR):
     os.makedirs(HOSTED_DIR)
 
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY,
+        username TEXT,
+        points INTEGER DEFAULT 0,
+        referrer_id INTEGER,
+        is_admin BOOLEAN DEFAULT 0,
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS subscriptions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        bot_token TEXT,
+        plan_type TEXT,
+        start_date TIMESTAMP,
+        end_date TIMESTAMP,
+        status TEXT DEFAULT 'active'
+    )
+    ''')
+    conn.commit()
+    conn.close()
+
 def execute_query(query, params=(), fetchone=False, fetchall=False):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -320,6 +347,7 @@ async def global_handler(message: Message, state: FSMContext):
 
 async def main():
     logging.basicConfig(level=logging.INFO)
+    init_db() # Ensure DB tables are created
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
