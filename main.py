@@ -168,7 +168,7 @@ async def check_join_callback(callback: CallbackQuery, state: FSMContext):
 async def my_points_callback(callback: CallbackQuery):
     user_id = callback.from_user.id
     result = execute_query("SELECT points FROM users WHERE user_id = ?", (user_id,), fetchone=True)
-    points = result[2] if result else 0
+    points = result[0] if result else 0 # Corrected index
     msg = (
         f"💰 **رصيد نقاطك:** `{points}` نقطة\n\n"
         "📈 **كيف تحصل على نقاط إضافية؟**\n"
@@ -196,7 +196,7 @@ async def buy_plan_callback(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     
     result = execute_query("SELECT points FROM users WHERE user_id = ?", (user_id,), fetchone=True)
-    points = result[2] if result else 0
+    points = result[2] if result else 0 # user_id, username, points
     
     if points < plan['points']:
         return await callback.answer(f"❌ نقاطك غير كافية! تحتاج إلى {plan['points']} نقطة.", show_alert=True)
